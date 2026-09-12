@@ -331,7 +331,6 @@ h2 {
 .pipeline-figure img {
   border: 0;
   background: transparent;
-  mix-blend-mode: multiply;
 }
 
 .pipeline-figure figcaption {
