@@ -349,10 +349,12 @@ h2 {
 }
 
 .pipeline-figure {
+  grid-column: 1 / -1;
+  justify-self: center;
   width: min(1480px, calc(100vw - 32px));
   margin-top: 54px;
-  margin-left: 50%;
-  transform: translateX(-50%);
+  margin-left: 0;
+  transform: none;
 }
 
 .application-list {
