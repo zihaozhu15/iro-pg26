@@ -5,11 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="IRO-PG26 — official research project page."
+      content="Inverse Rig Optimization from Line Drawings - a contour-driven method for recovering editable 3D character rig parameters from artist-drawn strokes."
     />
     <meta name="theme-color" content="#f7f4ed" />
+    <meta property="og:title" content="Inverse Rig Optimization from Line Drawings" />
+    <meta
+      property="og:description"
+      content="Recovering editable production-rig parameters from contour strokes drawn over the camera view."
+    />
+    <meta property="og:image" content="https://zihaozhu15.github.io/iro-pg26/assets/teaser.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
 
-    <title>IRO-PG26 | Research Project</title>
+    <title>Inverse Rig Optimization from Line Drawings</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -17,7 +24,7 @@
 
     <header class="hero">
       <nav class="nav shell" aria-label="Primary navigation">
-        <a class="wordmark" href="./" aria-label="IRO-PG26 home">IRO–PG26</a>
+        <a class="wordmark" href="./" aria-label="Project home">IRO</a>
         <div class="nav-links">
           <a href="#abstract">Abstract</a>
           <a href="#method">Method</a>
@@ -27,46 +34,44 @@
       </nav>
 
       <div class="hero-content shell">
-        <p class="eyebrow">Research project · 2026</p>
-        <h1>Replace this with your paper title</h1>
+        <p class="eyebrow">Pacific Graphics 2026 · arXiv preprint</p>
+        <h1>Inverse Rig Optimization from Line Drawings</h1>
         <p class="dek">
-          Add one clear sentence that explains the central idea and why it
-          matters. This is the first thing most visitors will read.
+          Recover editable production-rig parameters directly from contour
+          strokes drawn over the camera view.
         </p>
 
         <p class="authors" aria-label="Paper authors">
-          <a href="#">Zihao Zhu</a>
+          <a href="https://orcid.org/0009-0008-7980-8198">Zihao Zhu</a>
           <span>·</span>
-          <a href="#">Coauthor Name</a>
-          <span>·</span>
-          <a href="#">Coauthor Name</a>
+          <a href="https://orcid.org/0000-0002-3978-1444">Yuki Koyama</a>
         </p>
-        <p class="affiliation">Your University or Research Institute</p>
+        <p class="affiliation">The University of Tokyo, Japan</p>
 
         <div class="actions" aria-label="Project resources">
-          <a class="button button-primary" href="#">Paper</a>
-          <a class="button" href="#">arXiv</a>
-          <a
-            class="button"
-            href="https://github.com/zihaozhu15/iro-pg26"
-          >Code</a>
-          <a class="button" href="#">Data</a>
+          <a class="button button-primary" href="https://arxiv.org/pdf/2609.00732">Paper</a>
+          <a class="button" href="https://arxiv.org/abs/2609.00732">arXiv</a>
+          <a class="button" href="https://github.com/zihaozhu15/iro-pg26">Code</a>
+          <a class="button" href="#citation">BibTeX</a>
         </div>
       </div>
     </header>
 
     <main id="content">
       <section class="visual shell" aria-labelledby="overview-title">
-        <div class="visual-placeholder" role="img" aria-label="Teaser figure placeholder">
-          <div>
-            <span>TEASER FIGURE</span>
-            <p>Replace this panel with <code>assets/teaser.webp</code></p>
-          </div>
-        </div>
+        <img
+          class="teaser-image"
+          src="assets/teaser.jpg"
+          alt="Three examples showing an initial rigged pose, artist-drawn contour strokes, and the pose recovered by the method"
+          width="2216"
+          height="936"
+        />
         <h2 id="overview-title" class="sr-only">Project overview</h2>
         <p class="caption">
-          Write a short caption that lets readers understand the main result
-          without reading the full paper.
+          Given a rigged mesh, our method recovers the rig parameters that
+          produce the artist's strokes. Applications include facial expression
+          keyframing, hair posing, and stylized perspective. Character models
+          © Blender Studio and miHoYo.
         </p>
       </section>
 
@@ -75,10 +80,18 @@
         <div>
           <h2>Abstract</h2>
           <p>
-            Replace this paragraph with your abstract. For a project page, a
-            concise and approachable version often works better than copying a
-            long abstract verbatim. Introduce the problem, your key idea, and
-            the most important result.
+            Stylized 3D character animation is largely hand-authored, with
+            animators adjusting rig parameters one keyframe at a time. Because
+            stylized work reads chiefly through contour lines, drawing contours
+            in the camera view is a direct way to express artistic intent.
+          </p>
+          <p>
+            We recover high-level rig parameters from screen-space contour
+            strokes. A pre-trained MLP surrogate provides a differentiable map
+            from rig parameters to mesh vertices, replacing the production rig
+            inside the optimization. By matching projected mesh contours to
+            user-drawn lines and backpropagating their screen-space error, the
+            method turns sketches into editable rig controls.
           </p>
         </div>
       </section>
@@ -86,14 +99,46 @@
       <section id="method" class="section shell">
         <p class="section-number">02</p>
         <div>
-          <h2>Method</h2>
+          <h2>From a line to an editable rig</h2>
           <p class="section-intro">
-            Explain the method in two or three sentences, then replace the
-            panel below with your pipeline or architecture figure.
+            The production rig remains the artist's final authoring interface.
+            The NeuralRig is used only as a differentiable path during
+            optimization; recovered parameters are written back to the original
+            DCC rig.
           </p>
-          <div class="figure-placeholder" role="img" aria-label="Method figure placeholder">
-            METHOD FIGURE
+
+          <div class="process" aria-label="Method summary">
+            <article>
+              <span>1</span>
+              <h3>Draw</h3>
+              <p>The artist redraws selected contours over the rendered view.</p>
+            </article>
+            <article>
+              <span>2</span>
+              <h3>Match</h3>
+              <p>A two-stage matcher pairs strokes with projected contour vertices.</p>
+            </article>
+            <article>
+              <span>3</span>
+              <h3>Optimize</h3>
+              <p>Screen-space losses backpropagate through the NeuralRig to the controls.</p>
+            </article>
           </div>
+
+          <figure class="paper-figure pipeline-figure">
+            <img
+              src="assets/pipeline.jpg"
+              alt="Pipeline diagram from DCC inputs through NeuralRig, contour rendering, hierarchical matching, and optimization"
+              loading="lazy"
+              width="2166"
+              height="1036"
+            />
+            <figcaption>
+              Pipeline overview. A differentiable rig surrogate, hierarchical
+              contour matching, and a screen-space objective recover an updated
+              rig-parameter vector. Character model © Blender Studio.
+            </figcaption>
+          </figure>
         </div>
       </section>
 
@@ -102,24 +147,57 @@
         <div>
           <h2>Results</h2>
           <p class="section-intro">
-            Lead with the evidence that best supports your paper's main claim.
+            We demonstrate contour-driven rig inversion on facial expressions,
+            articulated objects, view-specific shape correction, and exaggerated
+            perspective. Individual poses are recovered in a few to a dozen
+            seconds while remaining editable through the standard rig interface.
           </p>
-          <div class="result-grid">
-            <article>
-              <p class="metric">+00.0%</p>
-              <h3>Primary metric</h3>
-              <p>Describe the most important quantitative improvement.</p>
-            </article>
-            <article>
-              <p class="metric">0.0×</p>
-              <h3>Efficiency</h3>
-              <p>Report speed, memory, data, or compute improvements.</p>
-            </article>
-            <article>
-              <p class="metric">00</p>
-              <h3>Evaluation scope</h3>
-              <p>Summarize datasets, tasks, subjects, or experiments.</p>
-            </article>
+
+          <figure class="paper-figure featured-result">
+            <img
+              src="assets/facial-results.jpg"
+              alt="Facial expression results on two cartoon-style rigged characters"
+              loading="lazy"
+              width="1537"
+              height="2048"
+            />
+            <figcaption>
+              Facial expression keyframing. Each recovered pose starts from the
+              rest pose and uses only the artist's redrawn contours as per-pose
+              input. Character models © Blender Studio.
+            </figcaption>
+          </figure>
+
+          <div class="result-gallery">
+            <figure class="paper-figure">
+              <img
+                src="assets/skirt-result.jpg"
+                alt="A skirt in its initial pose with target strokes and the optimized flared pose"
+                loading="lazy"
+                width="1237"
+                height="626"
+              />
+              <figcaption>
+                Contour-defined object posing. Redrawn hem lines coordinate
+                multiple rig controls in a single optimization. Character model
+                © miHoYo.
+              </figcaption>
+            </figure>
+
+            <figure class="paper-figure">
+              <img
+                src="assets/view-result.jpg"
+                alt="View-dependent contour adjustment on an anime-style face"
+                loading="lazy"
+                width="1177"
+                height="579"
+              />
+              <figcaption>
+                View-specific shape stylization. A single stroke adjusts the
+                jaw-cheek contour for the target camera. Character model
+                © DillonGoo Studios.
+              </figcaption>
+            </figure>
           </div>
         </div>
       </section>
@@ -128,14 +206,17 @@
         <p class="section-number">04</p>
         <div>
           <h2>Citation</h2>
-          <p class="section-intro">If you find this work useful, please cite:</p>
+          <p class="section-intro">If you find this work useful, please cite the preprint:</p>
           <div class="code-block">
             <button type="button" id="copy-citation">Copy</button>
-            <pre><code id="bibtex">@article{zhu2026iro,
-  title   = {Replace This with Your Paper Title},
-  author  = {Zhu, Zihao and Coauthor, Name},
-  journal = {Conference or Journal Name},
-  year    = {2026}
+            <pre><code id="bibtex">@misc{zhu2026inverse,
+  title         = {Inverse Rig Optimization from Line Drawings},
+  author        = {Zihao Zhu and Yuki Koyama},
+  year          = {2026},
+  eprint        = {2609.00732},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.GR},
+  url           = {https://arxiv.org/abs/2609.00732}
 }</code></pre>
           </div>
         </div>
@@ -144,8 +225,11 @@
 
     <footer>
       <div class="shell footer-content">
-        <p>IRO-PG26 · Research project page</p>
-        <a href="https://github.com/zihaozhu15/iro-pg26">View source on GitHub</a>
+        <p>Inverse Rig Optimization from Line Drawings · 2026</p>
+        <div>
+          <a href="https://arxiv.org/abs/2609.00732">arXiv</a>
+          <a href="https://github.com/zihaozhu15/iro-pg26">GitHub</a>
+        </div>
       </div>
     </footer>
 
