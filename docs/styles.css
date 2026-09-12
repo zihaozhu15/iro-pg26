@@ -68,8 +68,7 @@ a {
   text-align: center;
 }
 
-.eyebrow,
-.section-number {
+.eyebrow {
   color: #e58464;
   font-size: 0.78rem;
   font-weight: 750;
@@ -101,8 +100,9 @@ h1 {
 
 h2 {
   margin-bottom: 14px;
-  font-size: clamp(1.9rem, 3.4vw, 3rem);
+  font-size: clamp(1.7rem, 2.6vw, 2.45rem);
   line-height: 1.05;
+  text-align: center;
 }
 
 .dek {
@@ -227,25 +227,20 @@ h2 {
   display: grid;
   padding-block: 64px;
   border-bottom: 1px solid var(--line);
-  column-gap: 24px;
   row-gap: 0;
-  grid-template-columns: 56px minmax(0, 1fr);
-}
-
-.section-number {
-  padding-top: 12px;
-  font-size: 1.05rem;
-  font-weight: 800;
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .section > div {
   width: 100%;
   max-width: none;
+  margin-inline: auto;
 }
 
-.prose p:not(.section-number),
+.prose p,
 .section-intro {
   max-width: 920px;
+  margin-inline: auto;
   color: #39433f;
   font-family: Georgia, "Times New Roman", serif;
   font-size: clamp(1.1rem, 2vw, 1.35rem);
@@ -499,10 +494,6 @@ footer {
   .section {
     padding-block: 52px;
     grid-template-columns: 1fr;
-  }
-
-  .section-number {
-    margin-bottom: 8px;
   }
 
   .process,
