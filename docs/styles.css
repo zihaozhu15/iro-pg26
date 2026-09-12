@@ -479,13 +479,14 @@ footer {
     display: block;
   }
 
+  .authors .author-name,
   .authors a {
     display: block;
     width: fit-content;
     margin: 5px auto;
   }
 
-  .authors span {
+  .authors .separator {
     display: none;
   }
 
