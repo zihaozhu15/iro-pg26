@@ -194,14 +194,18 @@ h2 {
   background: var(--accent-dark);
 }
 
-.visual {
+.media-panel {
   position: relative;
-  margin-top: -72px;
   padding: clamp(10px, 1.6vw, 20px);
   border: 1px solid rgba(23, 32, 29, 0.1);
   border-radius: 14px;
   background: rgba(255, 253, 248, 0.98);
   box-shadow: 0 16px 44px rgba(22, 34, 29, 0.08);
+}
+
+.visual {
+  width: min(1480px, calc(100% - 32px));
+  margin-top: -72px;
   isolation: isolate;
 }
 
@@ -219,7 +223,7 @@ h2 {
   content: "";
 }
 
-.visual::after {
+.media-panel::after {
   position: absolute;
   top: -1px;
   right: 14%;
@@ -243,7 +247,7 @@ h2 {
 }
 
 .caption {
-  max-width: 760px;
+  max-width: 920px;
   margin: 14px auto 2px;
   color: var(--muted);
   font-size: 0.92rem;
@@ -339,7 +343,10 @@ h2 {
 }
 
 .pipeline-figure {
+  width: min(1480px, calc(100vw - 32px));
   margin-top: 54px;
+  margin-left: 50%;
+  transform: translateX(-50%);
 }
 
 .application-list {
@@ -487,7 +494,14 @@ footer {
   }
 
   .visual {
+    width: calc(100% - 20px);
     margin-top: -42px;
+    padding: 7px;
+    border-radius: 9px;
+  }
+
+  .pipeline-figure {
+    width: calc(100vw - 20px);
     padding: 7px;
     border-radius: 9px;
   }

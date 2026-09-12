@@ -58,7 +58,7 @@
     </header>
 
     <main id="content">
-      <section class="visual shell" aria-labelledby="overview-title">
+      <section class="visual media-panel shell" aria-labelledby="overview-title">
         <img
           class="teaser-image"
           src="assets/teaser.png"
@@ -81,17 +81,24 @@
           <h2>Abstract</h2>
           <p>
             Stylized 3D character animation is largely hand-authored, with
-            animators adjusting rig parameters one keyframe at a time. Because
-            stylized work reads chiefly through contour lines, drawing contours
-            in the camera view is a direct way to express artistic intent.
-          </p>
-          <p>
-            We recover high-level rig parameters from screen-space contour
-            strokes. A pre-trained MLP surrogate provides a differentiable map
-            from rig parameters to mesh vertices, replacing the production rig
-            inside the optimization. By matching projected mesh contours to
-            user-drawn lines and backpropagating their screen-space error, the
-            method turns sketches into editable rig controls.
+            animators authoring rig parameters one keyframe at a time to find
+            the best pose. Because stylized work reads chiefly through contour
+            lines, drawing contours in the camera view is the most direct and
+            precise way to express artistic intent. This mismatch between the
+            rig controls and the artist's goal forces a laborious trial-and-error
+            workflow, with animators repeatedly manipulating rig controls
+            against the rendered view to match the desired contour. To address
+            this, we propose a method that recovers rig parameters from
+            screen-space contour strokes, enabling effective keyframing from
+            sketches. Given strokes that redraw the current contour, our method
+            optimizes the high-level rig parameters defined in the DCC tool. The
+            key is to use a pre-trained MLP rig surrogate that provides a
+            differentiable map from rig parameters to mesh vertices, replacing
+            the original black-box rig within the optimization process. We match
+            user-drawn lines to mesh contour lines and backpropagate the
+            resulting screen-space error through the surrogate to update the rig
+            parameters. Our results demonstrate that the method works for
+            diverse characters and practical scenarios.
           </p>
         </div>
       </section>
@@ -125,7 +132,7 @@
             </article>
           </div>
 
-          <figure class="paper-figure pipeline-figure">
+          <figure class="paper-figure pipeline-figure media-panel">
             <img
               src="assets/pipeline.jpg"
               alt="Pipeline diagram from DCC inputs through NeuralRig, contour rendering, hierarchical matching, and optimization"
