@@ -51,7 +51,7 @@ a {
 }
 
 .hero {
-  min-height: 720px;
+  min-height: 620px;
   color: var(--paper);
   background:
     radial-gradient(circle at 80% 20%, rgba(191, 75, 44, 0.3), transparent 30%),
@@ -60,8 +60,8 @@ a {
 
 .hero-content {
   display: flex;
-  min-height: 720px;
-  padding-block: 80px;
+  min-height: 620px;
+  padding-block: 64px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -100,7 +100,7 @@ h1 {
 }
 
 h2 {
-  margin-bottom: 20px;
+  margin-bottom: 14px;
   font-size: clamp(1.9rem, 3.4vw, 3rem);
   line-height: 1.05;
 }
@@ -178,10 +178,6 @@ h2 {
   isolation: isolate;
 }
 
-.side-toc {
-  display: none;
-}
-
 .visual::before {
   position: absolute;
   bottom: 100%;
@@ -229,9 +225,10 @@ h2 {
 
 .section {
   display: grid;
-  padding-block: 92px;
+  padding-block: 64px;
   border-bottom: 1px solid var(--line);
-  gap: 24px;
+  column-gap: 24px;
+  row-gap: 0;
   grid-template-columns: 56px minmax(0, 1fr);
 }
 
@@ -256,14 +253,14 @@ h2 {
 
 .process {
   display: grid;
-  margin-top: 42px;
+  margin-top: 28px;
   gap: 1px;
   grid-template-columns: repeat(3, 1fr);
   background: var(--line);
 }
 
 .process article {
-  padding: 26px;
+  padding: 22px;
   background: var(--card);
 }
 
@@ -271,7 +268,7 @@ h2 {
   display: grid;
   width: 34px;
   height: 34px;
-  margin-bottom: 34px;
+  margin-bottom: 20px;
   place-items: center;
   border: 1px solid var(--accent);
   border-radius: 50%;
@@ -325,28 +322,28 @@ h2 {
   grid-column: 1 / -1;
   justify-self: center;
   width: min(1480px, calc(100vw - 32px));
-  margin-top: 54px;
+  margin-top: 36px;
   margin-left: 0;
   transform: none;
 }
 
 .application-list {
   display: grid;
-  margin-top: 44px;
+  margin-top: 28px;
   gap: 1px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   background: var(--line);
 }
 
 .application-list article {
-  min-height: 180px;
-  padding: 28px;
+  min-height: 150px;
+  padding: 22px;
   background: var(--card);
 }
 
 .application-list span {
   display: block;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
   color: var(--accent);
   font-size: 0.75rem;
   font-weight: 750;
@@ -367,7 +364,7 @@ h2 {
 .code-block {
   position: relative;
   overflow: hidden;
-  margin-top: 28px;
+  margin-top: 20px;
   border-radius: 3px;
   color: #e9eee9;
   background: #17201d;
@@ -376,7 +373,7 @@ h2 {
 .code-block pre {
   overflow-x: auto;
   margin: 0;
-  padding: 28px;
+  padding: 22px;
 }
 
 .code-block button {
@@ -398,7 +395,7 @@ footer {
 
 .footer-content {
   display: flex;
-  min-height: 150px;
+  min-height: 110px;
   align-items: center;
   justify-content: space-between;
   gap: 24px;
@@ -429,11 +426,11 @@ footer {
 @media (max-width: 720px) {
   .hero,
   .hero-content {
-    min-height: 650px;
+    min-height: 600px;
   }
 
   .hero-content {
-    padding-block: 60px;
+    padding-block: 42px;
   }
 
   h1 {
@@ -497,12 +494,12 @@ footer {
   }
 
   .section {
-    padding-block: 72px;
+    padding-block: 52px;
     grid-template-columns: 1fr;
   }
 
   .section-number {
-    margin-bottom: 16px;
+    margin-bottom: 8px;
   }
 
   .process,
@@ -510,63 +507,15 @@ footer {
     grid-template-columns: 1fr;
   }
 
+  .application-list article {
+    min-height: 0;
+  }
+
   .footer-content {
-    padding-block: 38px;
+    padding-block: 28px;
     flex-direction: column;
     align-items: flex-start;
     justify-content: center;
-  }
-}
-
-@media (min-width: 1670px) {
-  .side-toc {
-    position: fixed;
-    top: 50%;
-    right: 8px;
-    z-index: 10;
-    display: grid;
-    width: 84px;
-    padding: 13px 9px 10px;
-    border: 1px solid rgba(23, 32, 29, 0.12);
-    border-radius: 10px;
-    background: rgba(255, 253, 248, 0.9);
-    box-shadow: 0 10px 30px rgba(23, 32, 29, 0.09);
-    gap: 2px;
-    transform: translateY(-50%);
-    backdrop-filter: blur(10px);
-  }
-
-  .side-toc p {
-    margin: 0 5px 8px;
-    color: var(--muted);
-    font-size: 0.64rem;
-    font-weight: 750;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
-
-  .side-toc a {
-    display: grid;
-    padding: 7px 5px;
-    border-radius: 6px;
-    color: var(--muted);
-    font-size: 0.7rem;
-    line-height: 1.2;
-    text-decoration: none;
-    gap: 2px;
-    transition: color 160ms ease, background 160ms ease;
-  }
-
-  .side-toc a span {
-    color: var(--accent);
-    font-size: 0.62rem;
-    font-weight: 800;
-  }
-
-  .side-toc a:hover,
-  .side-toc a.is-active {
-    color: var(--ink);
-    background: rgba(191, 75, 44, 0.09);
   }
 }
 
