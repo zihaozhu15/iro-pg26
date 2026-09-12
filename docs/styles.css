@@ -249,6 +249,9 @@ h2 {
   color: #39433f;
   font-family: Georgia, "Times New Roman", serif;
   font-size: clamp(1.1rem, 2vw, 1.35rem);
+  hyphens: auto;
+  text-align: justify;
+  text-justify: inter-word;
 }
 
 .process {
