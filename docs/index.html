@@ -103,21 +103,42 @@
           </p>
 
           <div class="process" aria-label="Method summary">
-            <article>
-              <span>1</span>
-              <h3>Draw</h3>
-              <p>The artist redraws selected contours over the rendered view.</p>
+            <article class="process-preparation">
+              <div class="preparation-meta">
+                <strong>Preparation</strong>
+                <span>One-time setup</span>
+              </div>
+              <div>
+                <h3>Train NeuralRig</h3>
+                <p>A differentiable surrogate learns the mapping from rig parameters to mesh vertices.</p>
+              </div>
             </article>
-            <article>
-              <span>2</span>
-              <h3>Match</h3>
-              <p>A two-stage matcher pairs strokes with projected contour vertices.</p>
-            </article>
-            <article>
-              <span>3</span>
-              <h3>Optimize</h3>
-              <p>Screen-space losses backpropagate through the NeuralRig to the controls.</p>
-            </article>
+
+            <p class="workflow-label">Per-edit workflow</p>
+
+            <div class="process-steps">
+              <article>
+                <header>
+                  <span>1</span>
+                  <h3>Draw</h3>
+                </header>
+                <p>The artist redraws selected contours over the rendered view.</p>
+              </article>
+              <article>
+                <header>
+                  <span>2</span>
+                  <h3>Match</h3>
+                </header>
+                <p>A two-stage matcher pairs strokes with projected contour vertices.</p>
+              </article>
+              <article>
+                <header>
+                  <span>3</span>
+                  <h3>Optimize</h3>
+                </header>
+                <p>Screen-space losses backpropagate through the NeuralRig to the controls.</p>
+              </article>
+            </div>
           </div>
         </div>
 
