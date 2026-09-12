@@ -331,8 +331,13 @@ h2 {
 .pipeline-figure img {
   border: 0;
   background: transparent;
-  filter: drop-shadow(0 20px 24px rgba(22, 34, 29, 0.12));
   mix-blend-mode: multiply;
+}
+
+.pipeline-figure figcaption {
+  max-width: 920px;
+  margin: 14px auto 2px;
+  text-align: center;
 }
 
 .paper-figure figcaption {
