@@ -13,7 +13,7 @@
       property="og:description"
       content="Recovering editable production-rig parameters from contour strokes drawn over the camera view."
     />
-    <meta property="og:image" content="https://zihaozhu15.github.io/iro-pg26/assets/teaser.jpg" />
+    <meta property="og:image" content="https://zihaozhu15.github.io/iro-pg26/assets/teaser.png" />
     <meta name="twitter:card" content="summary_large_image" />
 
     <title>Inverse Rig Optimization from Line Drawings</title>
@@ -61,10 +61,10 @@
       <section class="visual shell" aria-labelledby="overview-title">
         <img
           class="teaser-image"
-          src="assets/teaser.jpg"
+          src="assets/teaser.png"
           alt="Three examples showing an initial rigged pose, artist-drawn contour strokes, and the pose recovered by the method"
-          width="2216"
-          height="936"
+          width="5505"
+          height="2318"
         />
         <h2 id="overview-title" class="sr-only">Project overview</h2>
         <p class="caption">
@@ -153,51 +153,27 @@
             seconds while remaining editable through the standard rig interface.
           </p>
 
-          <figure class="paper-figure featured-result">
-            <img
-              src="assets/facial-results.jpg"
-              alt="Facial expression results on two cartoon-style rigged characters"
-              loading="lazy"
-              width="1537"
-              height="2048"
-            />
-            <figcaption>
-              Facial expression keyframing. Each recovered pose starts from the
-              rest pose and uses only the artist's redrawn contours as per-pose
-              input. Character models © Blender Studio.
-            </figcaption>
-          </figure>
-
-          <div class="result-gallery">
-            <figure class="paper-figure">
-              <img
-                src="assets/skirt-result.jpg"
-                alt="A skirt in its initial pose with target strokes and the optimized flared pose"
-                loading="lazy"
-                width="1237"
-                height="626"
-              />
-              <figcaption>
-                Contour-defined object posing. Redrawn hem lines coordinate
-                multiple rig controls in a single optimization. Character model
-                © miHoYo.
-              </figcaption>
-            </figure>
-
-            <figure class="paper-figure">
-              <img
-                src="assets/view-result.jpg"
-                alt="View-dependent contour adjustment on an anime-style face"
-                loading="lazy"
-                width="1177"
-                height="579"
-              />
-              <figcaption>
-                View-specific shape stylization. A single stroke adjusts the
-                jaw-cheek contour for the target camera. Character model
-                © DillonGoo Studios.
-              </figcaption>
-            </figure>
+          <div class="application-list">
+            <article>
+              <span>01</span>
+              <h3>Facial expression keyframing</h3>
+              <p>Recover editable brow, eye, and mouth controls from a small set of drawn contours.</p>
+            </article>
+            <article>
+              <span>02</span>
+              <h3>Contour-defined object posing</h3>
+              <p>Coordinate many rig parameters through characteristic lines such as a garment hem.</p>
+            </article>
+            <article>
+              <span>03</span>
+              <h3>View-specific stylization</h3>
+              <p>Correct the projected shape of a character for a particular camera view.</p>
+            </article>
+            <article>
+              <span>04</span>
+              <h3>Stylized perspective</h3>
+              <p>Create deliberate, camera-specific exaggeration through the character's own rig.</p>
+            </article>
           </div>
         </div>
       </section>
