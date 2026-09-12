@@ -23,16 +23,6 @@
     <a class="skip-link" href="#content">Skip to content</a>
 
     <header class="hero">
-      <nav class="nav shell" aria-label="Primary navigation">
-        <a class="wordmark" href="./" aria-label="Project home">IRO</a>
-        <div class="nav-links">
-          <a href="#abstract">Abstract</a>
-          <a href="#method">Method</a>
-          <a href="#results">Results</a>
-          <a href="#citation">Citation</a>
-        </div>
-      </nav>
-
       <div class="hero-content shell">
         <p class="eyebrow">Pacific Graphics 2026 · arXiv preprint</p>
         <h1>Inverse Rig Optimization from Line Drawings</h1>
@@ -56,6 +46,14 @@
         </div>
       </div>
     </header>
+
+    <aside class="side-toc" aria-label="On this page">
+      <p>Contents</p>
+      <a href="#abstract"><span>1</span>Abstract</a>
+      <a href="#method"><span>2</span>Method</a>
+      <a href="#results"><span>3</span>Results</a>
+      <a href="#citation"><span>4</span>Citation</a>
+    </aside>
 
     <main id="content">
       <section class="visual media-panel shell" aria-labelledby="overview-title">
@@ -219,6 +217,30 @@
     <script>
       const copyButton = document.querySelector("#copy-citation");
       const bibtex = document.querySelector("#bibtex");
+      const tocLinks = [...document.querySelectorAll(".side-toc a")];
+      const sections = tocLinks
+        .map((link) => document.querySelector(link.getAttribute("href")))
+        .filter(Boolean);
+
+      const sectionObserver = new IntersectionObserver(
+        (entries) => {
+          const visibleSection = entries
+            .filter((entry) => entry.isIntersecting)
+            .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+
+          if (!visibleSection) return;
+
+          tocLinks.forEach((link) => {
+            const isCurrent = link.hash === `#${visibleSection.target.id}`;
+            link.classList.toggle("is-active", isCurrent);
+            if (isCurrent) link.setAttribute("aria-current", "location");
+            else link.removeAttribute("aria-current");
+          });
+        },
+        { rootMargin: "-28% 0px -58%", threshold: [0, 0.2, 0.5] }
+      );
+
+      sections.forEach((section) => sectionObserver.observe(section));
 
       copyButton.addEventListener("click", async () => {
         try {
