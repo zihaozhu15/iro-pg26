@@ -7,11 +7,11 @@
       name="description"
       content="Inverse Rig Optimization from Line Drawings - a contour-driven method for recovering editable 3D character rig parameters from artist-drawn strokes."
     />
-    <meta name="theme-color" content="#f7f4ed" />
+    <meta name="theme-color" content="#081824" />
     <meta property="og:title" content="Inverse Rig Optimization from Line Drawings" />
     <meta
       property="og:description"
-      content="Recovering editable production-rig parameters from contour strokes drawn over the camera view."
+      content="Recovering editable production-rig parameters from contour strokes redrawn over the camera view."
     />
     <meta property="og:image" content="https://zihaozhu15.github.io/iro-pg26/assets/teaser.png" />
     <meta name="twitter:card" content="summary_large_image" />
@@ -28,7 +28,7 @@
         <h1>Inverse Rig Optimization from Line Drawings</h1>
         <p class="dek">
           Recover editable production-rig parameters directly from contour
-          strokes drawn over the camera view.
+          strokes redrawn over the camera view.
         </p>
 
         <p class="authors" aria-label="Paper authors">
@@ -41,8 +41,6 @@
         <div class="actions" aria-label="Project resources">
           <a class="button button-primary" href="https://arxiv.org/pdf/2609.00732">Paper</a>
           <a class="button" href="https://arxiv.org/abs/2609.00732">arXiv</a>
-          <a class="button" href="https://github.com/zihaozhu15/iro-pg26">Code</a>
-          <a class="button" href="#citation">BibTeX</a>
         </div>
       </div>
     </header>
@@ -59,9 +57,11 @@
         <h2 id="overview-title" class="sr-only">Project overview</h2>
         <p class="caption">
           Given a rigged mesh, our method recovers the rig parameters that
-          produce the artist's strokes. Applications include facial expression
-          keyframing, hair posing, and stylized perspective. Character models
-          © Blender Studio and miHoYo.
+          produce the artist's strokes. We show three applications. Each example
+          consists of three panels: the initial pose with the rig controls
+          overlaid (left), the artist's stroke input (middle), and the optimized
+          pose produced by our method (right). Character models in (a) and (b)
+          © Blender Studio; character model in (c) © miHoYo.
         </p>
       </section>
 
@@ -94,13 +94,7 @@
 
       <section id="method" class="section shell">
         <div>
-          <h2>From a line to an editable rig</h2>
-          <p class="section-intro">
-            The production rig remains the artist's final authoring interface.
-            The NeuralRig is used only as a differentiable path during
-            optimization; recovered parameters are written back to the original
-            DCC rig.
-          </p>
+          <h2>Method</h2>
 
           <div class="process" aria-label="Method summary">
             <article class="process-preparation">
@@ -109,8 +103,14 @@
                 <span>One-time setup</span>
               </div>
               <div>
-                <h3>Train NeuralRig</h3>
-                <p>A differentiable surrogate learns the mapping from rig parameters to mesh vertices.</p>
+                <h3>Train a NeuralRig for each rigged mesh</h3>
+                <p>
+                  The production rig is a black box that does not expose gradients
+                  to an external optimizer. A differentiable surrogate learns the
+                  mapping from rig parameters to mesh vertices. The NeuralRig is
+                  used only as a differentiable path during optimization; recovered
+                  parameters are written back to the original DCC rig.
+                </p>
               </div>
             </article>
 
@@ -122,14 +122,14 @@
                   <span>1</span>
                   <h3>Draw</h3>
                 </header>
-                <p>The artist redraws selected contours over the rendered view.</p>
+                <p>The artist redraws detected contours over the rendered view.</p>
               </article>
               <article>
                 <header>
                   <span>2</span>
                   <h3>Match</h3>
                 </header>
-                <p>A two-stage matcher pairs strokes with projected contour vertices.</p>
+                <p>A two-stage matching process pairs stroke points with projected contour vertices.</p>
               </article>
               <article>
                 <header>
@@ -151,8 +151,21 @@
             height="4422"
           />
           <figcaption>
-            Pipeline overview. A differentiable rig surrogate, hierarchical
-            contour matching, and a screen-space objective recover an updated
+            <strong>Pipeline overview.</strong> The DCC tool supplies an initial rig parameter
+            vector <var>x<sub>0</sub></var> , the model and camera matrices
+            <span class="math-inline">(<var>M</var>, <var>V</var>, <var>P</var> )</span>, and a set of fixed contour
+            edge paths <var>ℰ</var>  along the visible contour of the current pose;
+            the animator redraws those contours as strokes <var>𝒮</var> .
+            The NeuralRig <span class="math-inline"><var>f</var><sub>neural</sub></span> ,
+            a differentiable surrogate for the production rig, then maps the
+            current rig parameters <var>x</var> to mesh vertices; Contour Rendering
+            filters by <var>ℰ</var>  and projects through
+            <span class="math-inline">(<var>M</var>, <var>V</var>, <var>P</var> )</span> to obtain 2D contour
+            polylines <var>𝒞</var> , which a two-stage matching pairs with
+            <var>𝒮</var>  to produce vertex–point pairs <var>𝒫</var> .
+            Backpropagating the screen-space loss over <var>𝒫</var> updates
+            <var>x</var> at each Adam step, and the recovered
+            <var>x<sup>∗</sup></var> is written back to the DCC as the new
             rig-parameter vector. Character model © Blender Studio.
           </figcaption>
         </figure>
@@ -162,34 +175,18 @@
         <div>
           <h2>Results</h2>
           <p class="section-intro">
-            We demonstrate contour-driven rig inversion on facial expressions,
-            articulated objects, view-specific shape correction, and exaggerated
-            perspective. Individual poses are recovered in a few to a dozen
-            seconds while remaining editable through the standard rig interface.
+            We evaluate contour-driven rig inversion on stylized 3D characters
+            across four applications: facial expression keyframing,
+            contour-defined object posing, view-specific shape stylization,
+            and stylized perspective. Each pose is recovered in a few to a dozen
+            seconds. The output is a rig-parameter vector rather than a baked
+            mesh, allowing further refinement through the character's standard
+            rig interface.
           </p>
 
-          <div class="application-list">
-            <article>
-              <span>01</span>
-              <h3>Facial expression keyframing</h3>
-              <p>Recover editable brow, eye, and mouth controls from a small set of drawn contours.</p>
-            </article>
-            <article>
-              <span>02</span>
-              <h3>Contour-defined object posing</h3>
-              <p>Coordinate many rig parameters through characteristic lines such as a garment hem.</p>
-            </article>
-            <article>
-              <span>03</span>
-              <h3>View-specific stylization</h3>
-              <p>Correct the projected shape of a character for a particular camera view.</p>
-            </article>
-            <article>
-              <span>04</span>
-              <h3>Stylized perspective</h3>
-              <p>Create deliberate, camera-specific exaggeration through the character's own rig.</p>
-            </article>
-          </div>
+          <p class="results-hint">Play or drag the timeline to explore both views in sync.</p>
+          <div id="result-examples" class="result-examples"></div>
+          <noscript><p class="results-hint">Enable JavaScript to explore the interactive results.</p></noscript>
         </div>
       </section>
 
@@ -223,6 +220,8 @@
       </div>
     </footer>
 
+    <script src="results-data.js" defer></script>
+    <script src="results.js" defer></script>
     <script>
       const copyButton = document.querySelector("#copy-citation");
       const bibtex = document.querySelector("#bibtex");
