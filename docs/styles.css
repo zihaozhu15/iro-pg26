@@ -196,22 +196,42 @@ h2 {
 
 .visual {
   position: relative;
-  margin-top: -64px;
+  margin-top: -72px;
+  padding: clamp(10px, 1.6vw, 20px);
+  border: 1px solid rgba(23, 32, 29, 0.1);
+  border-radius: 14px;
+  background: rgba(255, 253, 248, 0.98);
+  box-shadow: 0 16px 44px rgba(22, 34, 29, 0.08);
   isolation: isolate;
 }
 
 .visual::before {
   position: absolute;
-  inset: 5% 4% 16%;
-  z-index: -1;
-  border-radius: 50%;
-  background: radial-gradient(
-    ellipse at center,
-    rgba(217, 104, 65, 0.16),
-    rgba(42, 92, 76, 0.1) 45%,
-    transparent 72%
+  bottom: 100%;
+  left: 50%;
+  width: 1px;
+  height: 38px;
+  background: linear-gradient(
+    to bottom,
+    rgba(229, 132, 100, 0),
+    rgba(229, 132, 100, 0.78)
   );
-  filter: blur(28px);
+  content: "";
+}
+
+.visual::after {
+  position: absolute;
+  top: -1px;
+  right: 14%;
+  left: 14%;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(191, 75, 44, 0.75),
+    transparent
+  );
   content: "";
 }
 
@@ -219,13 +239,12 @@ h2 {
   display: block;
   width: 100%;
   height: auto;
-  filter: drop-shadow(0 26px 28px rgba(22, 34, 29, 0.18));
   transform: translateZ(0);
 }
 
 .caption {
   max-width: 760px;
-  margin: 20px auto 0;
+  margin: 14px auto 2px;
   color: var(--muted);
   font-size: 0.92rem;
   text-align: center;
@@ -465,6 +484,20 @@ footer {
     display: grid;
     max-width: 280px;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .visual {
+    margin-top: -42px;
+    padding: 7px;
+    border-radius: 9px;
+  }
+
+  .visual::before {
+    height: 26px;
+  }
+
+  .caption {
+    padding-inline: 8px;
   }
 
   .button {
