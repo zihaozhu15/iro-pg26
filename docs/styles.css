@@ -197,7 +197,7 @@ h2 {
 
 .visual {
   width: min(1184px, calc(100% - 32px));
-  margin-top: -72px;
+  margin-top: -48px;
   isolation: isolate;
 }
 
@@ -832,7 +832,7 @@ footer {
 
   .visual {
     width: calc(100% - 20px);
-    margin-top: -42px;
+    margin-top: -22px;
     padding: 7px;
     border-radius: 9px;
   }
