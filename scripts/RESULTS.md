@@ -1,41 +1,47 @@
 # Results assets
 
-The webpage uses static WebP frames only, not video elements or MP4 downloads.
-Frames and Start layers retain their source pixel dimensions and use lossless
-WebP encoding. Canvas buffers also match the source video dimensions; CSS scales
-the displayed size to fit the layout without reducing the underlying resolution.
-Example 04 places Start above the two side-by-side playback views.
-Each example has 48 evenly spaced frames per view, including the first and last
-source frames (example 03 uses only the first 2 seconds). A shared normalized
-frame index controls both views. The timeline follows the Blender clip duration;
-if paired clips have different lengths, the optimization view is retimed to the
-same 0-100% progress. Playback waits for both images if loading is slow.
+Each result example plays one H.264 MP4 per view (In Blender, In Optimization,
+and for example 04 an extra Another View). The In Blender video is the playback
+clock: the other views follow it, are nudged with `playbackRate` when they drift
+by more than 30 ms, and jump to the clock if they drift by more than 0.3 s. If
+any view stalls while buffering, all views pause and resume together. Play,
+pause, the progress slider and Replay always act on every view at once.
+
+Clips keep the first 4 s (01), 4 s (02), 3 s (03) and 5 s (04) of each source;
+change `CASES` to adjust. To keep decoding light, frame rate is capped at 24 fps and views
+are scaled to about twice their displayed size (800 × 800, or 1200 × 800 for
+04). Keyframes every 0.5 s keep slider seeking responsive. Every view of an
+example has the same frame rate and frame count.
+
+Example 04 shows Start and Another View on the first row, with In Blender and
+In Optimization below.
 
 ## Regenerate
 
-Install `Pillow` and `imageio-ffmpeg`, then run:
+Install `imageio-ffmpeg`, then run:
 
 ```sh
 python scripts/prepare-results.py
 ```
 
-Source files live in `docs/assets/results/01` through `04`. The plain MP4 names
-are Blender renders; names ending in `_` are optimization views. Paired clips
-are sampled at matching relative progress. The script preserves these sources and writes:
+Source videos live in `videos/`; Start PNG layers live in
+`docs/assets/results/01` through `04`. Clip lengths, sizes and view-to-file
+mapping are set in `CASES` at the top of the script. The script preserves the
+sources and writes:
 
-- `docs/assets/results/generated/`: compressed Start layers and 384 WebP frames.
-- `docs/results-data.js`: asset paths, dimensions, and playback durations.
+- `docs/assets/results/generated/0X/`: Start layers (lossless WebP), and per
+  view an H.264 MP4, a VP9 WebM fallback (for browsers without H.264, such as
+  VS Code's built-in preview) and a poster WebP. Browsers download only one of
+  the two video formats.
+- `docs/results-data.js`: asset paths, sizes, durations and view labels.
 
 Start layers are ordered character, green initial contour, red target strokes.
-Examples 02 and 03 already have a composite Start image. The exported layers in
-01 and 04 have matching aspect ratios; resizing to a common displayed rectangle
-preserves their alignment.
+Examples 02 and 03 already have a composite Start image.
 
 Publish the generated assets with `results-data.js`, `results.js`, `index.html`,
-and `styles.css`. Original MP4/PNG sources are not needed by the page. No build
-step or server API is needed; local HTML preview and GitHub Pages both work.
+and `styles.css`, and refresh their `?v=` hashes in `index.html`. Source videos
+and PNGs are not needed by the page. No build step or server API is needed.
 
-Frames load near the viewport or on interaction. The player prefetches the next
-two pairs and limits cached pairs according to source resolution (six pairs for
-1000 × 1000, three pairs for 1800 × 1200) to control decoded-image memory.
-Playback pauses when an example leaves the viewport or the tab is hidden.
+Videos use `preload="none"` with a poster and start buffering only when an
+example comes within 300 px of the viewport. Playback pauses when an example
+leaves the viewport or the tab is hidden.

@@ -13,18 +13,18 @@
       property="og:description"
       content="Recovering editable production-rig parameters from contour strokes redrawn over the camera view."
     />
-    <meta property="og:image" content="https://zihaozhu15.github.io/iro-pg26/assets/teaser.png" />
+    <meta property="og:image" content="https://zihaozhu15.github.io/iro-pg26/assets/teaser-og.jpg" />
     <meta name="twitter:card" content="summary_large_image" />
 
     <title>Inverse Rig Optimization from Line Drawings</title>
-    <link rel="stylesheet" href="styles.css?v=2cc9628bf8ff" />
+    <link rel="stylesheet" href="styles.css?v=4e826dfad7e9" />
   </head>
   <body>
     <a class="skip-link" href="#content">Skip to content</a>
 
     <header class="hero">
       <div class="hero-content shell">
-        <p class="eyebrow">Pacific Graphics 2026 · arXiv preprint</p>
+        <p class="eyebrow">Pacific Graphics 2026</p>
         <h1>Inverse Rig Optimization from Line Drawings</h1>
         <p class="dek">
           Recover editable production-rig parameters directly from contour
@@ -39,7 +39,8 @@
         <p class="affiliation">The University of Tokyo, Japan</p>
 
         <div class="actions" aria-label="Project resources">
-          <a class="button button-primary" href="https://arxiv.org/pdf/2609.00732">Paper</a>
+          <a class="button button-primary" href="https://diglib.eg.org/bitstream/handle/10.2312/pg20261011/pg20261011.pdf">Paper</a>
+          <a class="button" href="https://doi.org/10.2312/pg.20261011">DOI</a>
           <a class="button" href="https://arxiv.org/abs/2609.00732">arXiv</a>
         </div>
       </div>
@@ -49,10 +50,13 @@
       <section class="visual media-panel shell" aria-labelledby="overview-title">
         <img
           class="teaser-image"
-          src="assets/teaser.png"
+          src="assets/teaser-2560.webp"
+          srcset="assets/teaser-1280.webp 1280w, assets/teaser-2560.webp 2560w"
+          sizes="(min-width: 1160px) 1120px, calc(100vw - 40px)"
           alt="Three examples showing an initial rigged pose, artist-drawn contour strokes, and the pose recovered by the method"
-          width="5505"
-          height="2318"
+          width="2560"
+          height="1078"
+          fetchpriority="high"
         />
         <h2 id="overview-title" class="sr-only">Project overview</h2>
         <p class="caption">
@@ -143,13 +147,18 @@
         </div>
 
         <figure class="paper-figure pipeline-figure media-panel">
-          <img
-            src="assets/pipeline.png"
-            alt="Pipeline diagram from DCC inputs through NeuralRig, contour rendering, hierarchical matching, and optimization"
-            loading="lazy"
-            width="10000"
-            height="4422"
-          />
+          <a href="assets/pipeline.png" title="Open full-resolution figure">
+            <img
+              src="assets/pipeline-3000.webp"
+              srcset="assets/pipeline-1600.webp 1600w, assets/pipeline-3000.webp 3000w"
+              sizes="(min-width: 1320px) 1280px, calc(100vw - 40px)"
+              alt="Pipeline diagram from DCC inputs through NeuralRig, contour rendering, hierarchical matching, and optimization"
+              loading="lazy"
+              decoding="async"
+              width="3000"
+              height="1326"
+            />
+          </a>
           <figcaption>
             <strong>Pipeline overview.</strong> The DCC tool supplies an initial rig parameter
             vector <var>x<sub>0</sub></var> , the model and camera matrices
@@ -193,17 +202,18 @@
       <section id="citation" class="section shell">
         <div>
           <h2>Citation</h2>
-          <p class="section-intro">If you find this work useful, please cite the preprint:</p>
+          <p class="section-intro">If you find this work useful, please cite our paper:</p>
           <div class="code-block">
             <button type="button" id="copy-citation">Copy</button>
-            <pre><code id="bibtex">@misc{zhu2026inverse,
-  title         = {Inverse Rig Optimization from Line Drawings},
-  author        = {Zihao Zhu and Yuki Koyama},
-  year          = {2026},
-  eprint        = {2609.00732},
-  archivePrefix = {arXiv},
-  primaryClass  = {cs.GR},
-  url           = {https://arxiv.org/abs/2609.00732}
+            <pre><code id="bibtex">@inproceedings{10.2312:pg.20261011,
+booktitle = {Pacific Graphics 2026 - Conference Papers and Posters},
+editor = {He, Ying and Thuerey, Nils and Liu, Lingjie},
+title = {{Inverse Rig Optimization from Line Drawings}},
+author = {Zhu, Zihao and Koyama, Yuki},
+year = {2026},
+publisher = {The Eurographics Association},
+ISBN = {978-3-03868-327-8},
+DOI = {10.2312/pg.20261011}
 }</code></pre>
           </div>
         </div>
@@ -214,14 +224,15 @@
       <div class="shell footer-content">
         <p>Inverse Rig Optimization from Line Drawings · 2026</p>
         <div>
+          <a href="https://doi.org/10.2312/pg.20261011">DOI</a>
           <a href="https://arxiv.org/abs/2609.00732">arXiv</a>
           <a href="https://github.com/zihaozhu15/iro-pg26">GitHub</a>
         </div>
       </div>
     </footer>
 
-    <script src="results-data.js?v=22f1f9023477" defer></script>
-    <script src="results.js?v=9fecb3a052d8" defer></script>
+    <script src="results-data.js?v=f9a4c87d3de4" defer></script>
+    <script src="results.js?v=6390890bd8af" defer></script>
     <script>
       const copyButton = document.querySelector("#copy-citation");
       const bibtex = document.querySelector("#bibtex");

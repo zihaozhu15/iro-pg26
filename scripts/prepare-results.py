@@ -1,93 +1,122 @@
-"""Extract paired static WebP sequences for the Results demo.
+"""Encode the per-view result videos and Start layers for the Results demo.
 
-Requires Pillow and imageio-ffmpeg. Run from any directory with:
+Requires imageio-ffmpeg. Run from any directory with:
     python scripts/prepare-results.py
-Source PNG/MP4 files are preserved. No video is used by the website.
+Source videos in videos/ and Start PNGs in docs/assets/results/0X are preserved.
 """
-import json
 import hashlib
-import math
+import json
+import re
+import shutil
 import subprocess
 from pathlib import Path
 
 import imageio_ffmpeg
-from PIL import Image
 
-DOCS = Path(__file__).resolve().parents[1] / 'docs'
+PROJECT = Path(__file__).resolve().parents[1]
+DOCS = PROJECT / 'docs'
+VIDEOS = PROJECT / 'videos'
 ROOT = DOCS / 'assets/results'
-COUNT = 48
-ENCODING_VERSION = 'native-resolution-lossless-v1'
-CLIP_END = {'03': 2.0}
+FFMPEG = imageio_ffmpeg.get_ffmpeg_exe()
+ENCODING_VERSION = 'per-view-h264-vp9-v2'
+# Keep decoding light: every view plays at once, so frame rate is capped and
+# each view is scaled to about 2x its displayed CSS size.
+MAX_FPS = 24
+CRF = 23
+KEYFRAME_SECONDS = 0.5
 COPYRIGHT_HOLDERS = {
     '01': 'Blender Studio',
     '02': 'miHoYo',
     '03': 'DillonGoo Studios',
     '04': 'miHoYo',
 }
+LABELS = {'blender': 'In Blender', 'optimization': 'In Optimization', 'angle': 'Another View'}
+# (id, title, clip seconds or None for the shortest source, output size, layout, views, Start layers).
+# The first view is the playback clock that the other views follow.
 CASES = [
-    ('01', 'storm1', 'Facial expression keyframing',
+    ('01', 'Facial expression keyframing', 4, (800, 800), 'side-by-side',
+     {'blender': '1_render_process.mp4', 'optimization': '1_match_process.mp4'},
      ['teaser_rigged_mesh_no_ui.png', 'initial contour matched.png', 'input stroke.png']),
-    ('02', 'skirt', 'Contour-defined object posing', ['skirt_input.png']),
-    ('03', 'vd', 'View-specific stylization', ['vd_input.png']),
-    ('04', 'sp', 'Stylized perspective', ['sp_initial.png', 'sp_contour.png', 'sp_input.png']),
+    ('02', 'Contour-defined object posing', 4, (800, 800), 'side-by-side',
+     {'blender': '2_viewport_process.mp4', 'optimization': '2_match_process.mp4'},
+     ['skirt_input.png']),
+    ('03', 'View-specific stylization', 3, (800, 800), 'side-by-side',
+     {'blender': '3_viewport_process.mp4', 'optimization': '3_match_process.mp4'},
+     ['vd_input.png']),
+    ('04', 'Stylized perspective', 5, (1200, 800), 'start-above',
+     {'blender': '4_viewport_process.mp4', 'optimization': '4_match_process.mp4', 'angle': '4_another_angle.mp4'},
+     ['sp_initial.png', 'sp_contour.png', 'sp_input.png']),
 ]
+
+
+def ffmpeg(*args):
+    subprocess.run([FFMPEG, '-hide_banner', '-loglevel', 'error', '-y', *args], check=True)
+
+
+def probe(video):
+    info = subprocess.run([FFMPEG, '-hide_banner', '-i', str(video)], capture_output=True, text=True).stderr
+    h, m, s = re.search(r'Duration: (\d+):(\d+):([\d.]+)', info).groups()
+    fps = float(re.search(r'([\d.]+) fps', info).group(1))
+    return int(h) * 3600 + int(m) * 60 + float(s), fps
+
+
+def versioned(path):
+    return path.relative_to(DOCS).as_posix() + '?v=' + hashlib.sha256(path.read_bytes()).hexdigest()[:12]
 
 
 def main():
     records = []
-    for case_id, stem, title, layers in CASES:
-        source = ROOT / case_id
+    for case_id, title, clip, (w, h), layout, views, layers in CASES:
         target = ROOT / 'generated' / case_id
-        target.mkdir(parents=True, exist_ok=True)
+        if target.exists():
+            shutil.rmtree(target)
+        target.mkdir(parents=True)
+
         start_paths = []
         for i, name in enumerate(layers):
-            with Image.open(source / name) as image:
-                image = image.convert('RGBA')
-                dest = target / f'start-{i}.webp'
-                image.save(dest, 'WEBP', lossless=True, method=6)
-                version = hashlib.sha256(dest.read_bytes()).hexdigest()[:12]
-                start_paths.append(dest.relative_to(DOCS).as_posix() + f'?v={version}')
+            dest = target / f'start-{i}.webp'
+            # Layers share one size so the stacked overlays stay aligned.
+            ffmpeg('-i', str(ROOT / case_id / name), '-vf', f'scale={w}:{h}:flags=lanczos',
+                   '-c:v', 'libwebp', '-quality', '90',
+                   '-compression_level', '6', '-pix_fmt', 'yuva420p', str(dest))
+            start_paths.append(versioned(dest))
 
-        tracks = {}
-        durations = []
-        for track, suffix in [('blender', ''), ('optimization', '_')]:
-            video = source / f'{stem}{suffix}.mp4'
-            reader = imageio_ffmpeg.read_frames(str(video))
-            meta = next(reader)
-            reader.close()
-            total, _ = imageio_ffmpeg.count_frames_and_secs(str(video))
-            duration = min(meta['duration'], CLIP_END.get(case_id, meta['duration']))
-            last = min(total - 1, math.floor(duration * meta['fps']))
-            indices = [round(i * last / (COUNT - 1)) for i in range(COUNT)]
-            selection = '+'.join(f'eq(n\\,{index})' for index in indices)
-            output = target / track
-            output.mkdir(exist_ok=True)
-            subprocess.run([
-                imageio_ffmpeg.get_ffmpeg_exe(), '-hide_banner', '-loglevel', 'error',
-                '-y', '-i', str(video), '-vf', f'select={selection}',
-                '-fps_mode', 'vfr', '-frames:v', str(COUNT), '-start_number', '0',
-                '-c:v', 'libwebp', '-pix_fmt', 'bgra', '-lossless', '1',
-                '-compression_level', '4', str(output / 'frame-%03d.webp'),
-            ], check=True)
-            frames = [output / f'frame-{i:03d}.webp' for i in range(COUNT)]
-            assert all(p.is_file() and p.stat().st_size > 0 for p in frames)
-            for frame in frames:
-                with Image.open(frame) as image:
-                    assert image.size == meta['source_size'], f'Unexpected frame resolution: {frame}'
-            version = hashlib.sha256(video.read_bytes() + str((duration, COUNT, ENCODING_VERSION)).encode()).hexdigest()[:12]
-            tracks[track] = [p.relative_to(DOCS).as_posix() + f'?v={version}' for p in frames]
-            durations.append(duration)
-            print(f'{case_id} {track}: {total} source frames -> {COUNT} WebP frames, 0-{duration:.2f}s, last source index {last}', flush=True)
-        width, height = meta['source_size']
-        records.append(dict(id=case_id, copyrightHolder=COPYRIGHT_HOLDERS[case_id], title=title, starts=start_paths, tracks=tracks,
-                            frameCount=COUNT, duration=durations[0], sourceDurations=durations,
-                            layout='start-above' if case_id == '04' else 'side-by-side', width=width, height=height))
+        sources = {key: VIDEOS / name for key, name in views.items()}
+        probes = {key: probe(path) for key, path in sources.items()}
+        duration = min([clip or float('inf')] + [d for d, _ in probes.values()])
+        # Shared frame rate keeps every view on the same frame grid.
+        fps = min([MAX_FPS] + [f for _, f in probes.values()])
+        tracks = []
+        for key, source in sources.items():
+            video = target / f'{key}.mp4'
+            ffmpeg('-i', str(source), '-t', f'{duration:.3f}', '-an',
+                   '-vf', f'fps={fps:g},scale={w}:{h}:flags=lanczos,setsar=1,format=yuv420p',
+                   '-c:v', 'libx264', '-preset', 'slow', '-crf', str(CRF),
+                   '-profile:v', 'high', '-level', '4.0', '-g', str(round(fps * KEYFRAME_SECONDS)),
+                   '-movflags', '+faststart', str(video))
+            # VP9 fallback for browsers without H.264, such as VS Code's built-in preview.
+            webm = target / f'{key}.webm'
+            ffmpeg('-i', str(source), '-t', f'{duration:.3f}', '-an',
+                   '-vf', f'fps={fps:g},scale={w}:{h}:flags=lanczos,setsar=1,format=yuv420p',
+                   '-c:v', 'libvpx-vp9', '-crf', '34', '-b:v', '0', '-row-mt', '1', '-deadline', 'good',
+                   '-cpu-used', '2', '-g', str(round(fps * KEYFRAME_SECONDS)), str(webm))
+            poster = target / f'{key}-poster.webp'
+            ffmpeg('-i', str(video), '-frames:v', '1', '-c:v', 'libwebp', '-quality', '85', str(poster))
+            tracks.append(dict(key=key, label=LABELS[key], video=versioned(video), webm=versioned(webm),
+                               poster=versioned(poster)))
+            print(f'{case_id} {key}: {w}x{h} @ {fps:g} fps, {duration:.2f}s, '
+                  f'{video.stat().st_size / 1024 / 1024:.2f} MiB', flush=True)
+
+        records.append(dict(id=case_id, copyrightHolder=COPYRIGHT_HOLDERS[case_id], title=title,
+                            starts=start_paths, tracks=tracks, duration=round(duration, 2),
+                            layout=layout, width=w, height=h))
+
     # A classic script also supports opening index.html directly via file://.
     (DOCS / 'results-data.js').write_text(
         '// Generated by scripts/prepare-results.py\nwindow.RESULTS_DATA = ' +
         json.dumps(records, indent=2) + ';\n', encoding='utf-8')
-    size = sum(p.stat().st_size for p in (ROOT / 'generated').rglob('*.webp'))
-    print(f'Generated assets: {size / 1024 / 1024:.2f} MiB')
+    size = sum(p.stat().st_size for p in (ROOT / 'generated').rglob('*') if p.is_file())
+    print(f'Generated assets: {size / 1024 / 1024:.2f} MiB ({ENCODING_VERSION})')
 
 
 if __name__ == '__main__':

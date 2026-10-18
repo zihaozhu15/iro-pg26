@@ -1,29 +1,39 @@
-/* Paired frame players: one index, one clock, and an atomic update for both views. */
+/* Synchronized result videos: the first view is the clock and the others follow it. */
 (() => {
   const container = document.querySelector('#result-examples');
   const examples = window.RESULTS_DATA;
   if (!container || !examples) return;
 
+  const STEPS = 1000;
+  // Followers within this offset play normally; larger offsets are nudged with
+  // playbackRate, and anything beyond HARD_SYNC jumps straight to the clock.
+  const TOLERANCE = 0.03;
+  const HARD_SYNC = 0.3;
+  const MAX_RATE_CHANGE = 0.08;
+  const PAIRED = ['blender', 'optimization'];
   const time = (seconds) => `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, '0')}`;
-  const loadImage = (url) => new Promise((resolve, reject) => {
-    const image = new Image();
-    image.onload = async () => {
-      try { await image.decode(); resolve(image); }
-      catch (error) { reject(error); }
-    };
-    image.onerror = () => reject(new Error(`Unable to load ${url}`));
-    image.src = url;
-  });
+  const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
-  class FramePlayer {
+  const view = (example, track) => `
+    <figure>
+      <figcaption>${track.label}</figcaption>
+      <div class="result-frame">
+        <video muted playsinline preload="none" disablepictureinpicture data-poster="${track.poster}"
+          width="${example.width}" height="${example.height}" aria-label="${example.title}: ${track.label.toLowerCase()} view">
+          <source src="${track.video}" type="video/mp4; codecs=avc1.640028">
+          <source src="${track.webm}" type="video/webm; codecs=vp9">
+        </video>
+      </div>
+    </figure>`;
+
+  class SyncedPlayer {
     constructor(example) {
       this.example = example;
-      this.index = 0;
-      this.revision = 0;
+      this.duration = example.duration;
       this.playing = false;
-      this.ready = false;
-      this.cache = new Map();
-      this.cacheLimit = Math.max(3, Math.min(10, Math.floor(48 * 1024 * 1024 / (example.width * example.height * 8))));
+      this.loop = 0;
+      const paired = example.tracks.filter((track) => PAIRED.includes(track.key));
+      const extra = example.tracks.filter((track) => !PAIRED.includes(track.key));
       this.row = document.createElement('article');
       this.row.className = 'result-example';
       if (example.layout === 'start-above') this.row.classList.add('result-example--landscape');
@@ -42,145 +52,197 @@
             </div>
             <p class="result-legend"><span class="legend-initial">Initial contour</span><span class="legend-target">Target strokes</span></p>
           </figure>
+          ${extra.map((track) => view(example, track)).join('')}
           <div class="result-playback" role="group" aria-label="${example.title}: synchronized views">
-            <div class="result-views">
-              ${['blender', 'optimization'].map((track) => `
-                <figure>
-                  <figcaption>${track === 'blender' ? 'In Blender' : 'In Optimization'}</figcaption>
-                  <div class="result-frame">
-                    <img class="result-poster" src="${example.tracks[track][0]}" loading="lazy" alt="${example.title}: ${track} initial frame" width="${example.width}" height="${example.height}">
-                    <canvas width="${example.width}" height="${example.height}" role="img" aria-label="${example.title}: ${track} view"></canvas>
-                  </div>
-                </figure>`).join('')}
-            </div>
+            <div class="result-views">${paired.map((track) => view(example, track)).join('')}</div>
             <div class="result-controls">
               <button class="result-toggle" type="button" aria-label="Play ${example.title}"><span aria-hidden="true">▶</span><span class="toggle-text">Play</span></button>
-              <input type="range" min="0" max="${example.frameCount - 1}" step="1" value="0" aria-label="${example.title}: synchronized progress" aria-valuetext="Start">
-              <output class="result-time">0:00 / ${time(example.duration)}</output>
+              <input type="range" min="0" max="${STEPS}" step="1" value="0" aria-label="${example.title}: synchronized progress" aria-valuetext="Start">
+              <output class="result-time">0:00 / ${time(this.duration)}</output>
             </div>
             <p class="result-status" role="status" aria-live="polite"></p>
           </div>
         </div>
         <p class="result-credit">Character model © ${example.copyrightHolder}</p>`;
       container.append(this.row);
+
+      // Order videos as in the data so the first track is always the clock.
+      const byKey = new Map([...this.row.querySelectorAll('video')].map((video, i) =>
+        [[...extra, ...paired][i].key, video]));
+      this.videos = example.tracks.map((track) => byKey.get(track.key));
+      [this.clock, ...this.followers] = this.videos;
       this.button = this.row.querySelector('.result-toggle');
       this.slider = this.row.querySelector('input');
       this.output = this.row.querySelector('output');
       this.status = this.row.querySelector('.result-status');
-      this.canvases = [...this.row.querySelectorAll('canvas')];
+
       this.button.addEventListener('click', () => this.playing ? this.pause() : this.play());
-      this.slider.addEventListener('input', () => {
-        this.pause();
-        this.show(Number(this.slider.value));
+      this.slider.addEventListener('input', () => this.seek(Number(this.slider.value) / STEPS * this.duration));
+      this.clock.addEventListener('loadedmetadata', () => {
+        if (Number.isFinite(this.clock.duration)) this.duration = this.clock.duration;
+        this.render();
+      });
+      this.clock.addEventListener('ended', () => this.finish());
+      this.videos.forEach((video) => {
+        // A stalled view holds the others so no view runs ahead while buffering.
+        video.addEventListener('waiting', () => this.stall());
+        video.addEventListener('canplay', () => this.resume());
+        video.addEventListener('seeked', () => { if (!this.playing) this.render(); });
+        // A failed <source> falls through to the next one; only the last source or a decode error is fatal.
+        video.addEventListener('error', () => this.fail());
+        video.querySelector('source:last-of-type').addEventListener('error', () => this.fail());
       });
     }
 
-    pair(index) {
-      if (this.cache.has(index)) {
-        const cached = this.cache.get(index);
-        this.cache.delete(index);
-        this.cache.set(index, cached);
-        return cached;
-      }
-      const promise = Promise.all([
-        loadImage(this.example.tracks.blender[index]),
-        loadImage(this.example.tracks.optimization[index]),
-      ]).catch((error) => { this.cache.delete(index); throw error; });
-      this.cache.set(index, promise);
-      // Bound decoded-image memory; the browser can reuse downloaded files.
-      while (this.cache.size > this.cacheLimit) this.cache.delete(this.cache.keys().next().value);
-      return promise;
+    load() {
+      this.videos.forEach((video) => {
+        if (video.preload === 'auto') return;
+        // Posters are not lazy-loaded by the browser, so they are attached here too.
+        video.poster = video.dataset.poster;
+        video.preload = 'auto';
+        // Some browsers do not resume resource selection after preload="none" changes.
+        if (video.readyState === HTMLMediaElement.HAVE_NOTHING) video.load();
+      });
     }
 
-    async show(index) {
-      const revision = ++this.revision;
-      this.row.setAttribute('aria-busy', 'true');
-      const loading = setTimeout(() => {
-        if (revision === this.revision) this.status.textContent = 'Loading frames…';
-      }, 200);
+    ready() {
+      return this.videos.every((video) => video.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA);
+    }
+
+    async play() {
+      this.load();
+      this.videos.forEach((video) => {
+        if (video.error || video.networkState === HTMLMediaElement.NETWORK_NO_SOURCE) video.load();
+      });
+      this.playing = true;
+      this.updateButton();
+      if (this.clock.ended || this.clock.currentTime >= this.duration - 0.05) this.align(0);
+      await this.resume();
+    }
+
+    // Start (or restart after buffering) every view from the clock's time.
+    async resume() {
+      if (!this.playing || !this.ready()) {
+        if (this.playing) this.showLoading();
+        return;
+      }
+      if (this.videos.every((video) => !video.paused)) return;
+      clearTimeout(this.loading);
+      this.status.textContent = '';
+      this.align(this.clock.currentTime);
       try {
-        const images = await this.pair(index);
-        if (revision !== this.revision) return false;
-        // Await both decoded images, then paint both within the same browser task.
-        this.canvases.forEach((canvas, i) => {
-          canvas.getContext('2d').drawImage(images[i], 0, 0, canvas.width, canvas.height);
-          canvas.dataset.frame = index;
-        });
-        this.row.classList.add('frames-ready');
-        this.ready = true;
-        this.index = index;
-        this.slider.value = index;
-        this.slider.style.setProperty('--progress', `${index / (this.example.frameCount - 1) * 100}%`);
-        this.slider.setAttribute('aria-valuetext', `${Math.round(index / (this.example.frameCount - 1) * 100)}%, frame ${index + 1} of ${this.example.frameCount}`);
-        this.output.textContent = `${time(this.example.duration * index / (this.example.frameCount - 1))} / ${time(this.example.duration)}`;
-        this.status.textContent = '';
-        this.row.dataset.frame = index;
-        this.updateButton();
-        for (let next = index + 1; next <= Math.min(index + 2, this.example.frameCount - 1); next++) {
-          this.pair(next).catch(() => {});
-        }
-        return true;
-      } catch {
-        if (revision === this.revision) {
-          this.pause();
-          this.status.textContent = 'Could not load this frame. Press Play or move the slider to retry.';
-        }
-        return false;
-      } finally {
-        clearTimeout(loading);
-        if (revision === this.revision) this.row.setAttribute('aria-busy', 'false');
+        await Promise.all(this.videos.map((video) => video.play()));
+        this.tick(++this.loop);
+      } catch (error) {
+        if (error.name !== 'AbortError') this.fail();
       }
     }
 
-    updateButton() {
-      const label = this.playing ? 'Pause' : this.index === this.example.frameCount - 1 ? 'Replay' : 'Play';
-      this.button.querySelector('.toggle-text').textContent = label;
-      this.button.firstElementChild.textContent = this.playing ? 'Ⅱ' : '▶';
-      this.button.setAttribute('aria-label', `${label} ${this.example.title}`);
+    stall() {
+      if (!this.playing) return;
+      this.videos.forEach((video) => video.pause());
+      this.showLoading();
+    }
+
+    showLoading() {
+      clearTimeout(this.loading);
+      this.loading = setTimeout(() => {
+        if (this.playing && !this.ready()) this.status.textContent = 'Loading video…';
+      }, 300);
     }
 
     pause() {
       this.playing = false;
-      clearTimeout(this.timer);
+      clearTimeout(this.loading);
+      this.videos.forEach((video) => video.pause());
+      this.align(this.clock.currentTime);
+      this.updateButton();
+      this.render();
+    }
+
+    finish() {
+      this.pause();
+      this.align(this.duration);
+      this.render(this.duration);
+    }
+
+    seek(seconds) {
+      this.load();
+      this.playing = false;
+      this.videos.forEach((video) => video.pause());
+      this.align(seconds);
+      this.updateButton();
+      this.render(seconds);
+    }
+
+    align(seconds) {
+      this.videos.forEach((video) => {
+        video.playbackRate = 1;
+        if (Math.abs(video.currentTime - seconds) > 0.001) video.currentTime = seconds;
+      });
+    }
+
+    // Each displayed clock frame, steer the followers toward it.
+    tick(loop) {
+      // Frame callbacks left over from before a pause must not start a second loop.
+      if (loop !== this.loop || !this.playing || this.clock.paused) return;
+      const now = this.clock.currentTime;
+      this.followers.forEach((video) => {
+        if (video.paused || video.seeking) return;
+        const offset = video.currentTime - now;
+        if (Math.abs(offset) > HARD_SYNC) video.currentTime = now;
+        else video.playbackRate = Math.abs(offset) < TOLERANCE ? 1 : clamp(1 - offset * 2, 1 - MAX_RATE_CHANGE, 1 + MAX_RATE_CHANGE);
+      });
+      this.render();
+      if ('requestVideoFrameCallback' in this.clock) this.clock.requestVideoFrameCallback(() => this.tick(loop));
+      else requestAnimationFrame(() => this.tick(loop));
+    }
+
+    render(seconds = this.clock.currentTime) {
+      const current = clamp(seconds, 0, this.duration);
+      const progress = this.duration ? current / this.duration : 0;
+      if (document.activeElement !== this.slider || this.playing) this.slider.value = Math.round(progress * STEPS);
+      this.slider.style.setProperty('--progress', `${progress * 100}%`);
+      this.slider.setAttribute('aria-valuetext', `${Math.round(progress * 100)}%, ${time(current)} of ${time(this.duration)}`);
+      this.output.textContent = `${time(current)} / ${time(this.duration)}`;
+    }
+
+    fail() {
+      this.playing = false;
+      clearTimeout(this.loading);
+      this.videos.forEach((video) => video.pause());
+      this.status.textContent = 'Could not load this video. Press Play to retry.';
       this.updateButton();
     }
 
-    async play() {
-      this.playing = true;
-      this.updateButton();
-      const first = this.index === this.example.frameCount - 1 ? 0 : Number(this.slider.value);
-      const shown = await this.show(first);
-      if (shown && this.playing) this.schedule();
-    }
-
-    schedule() {
-      if (this.index === this.example.frameCount - 1) { this.pause(); return; }
-      this.timer = setTimeout(async () => {
-        const shown = await this.show(this.index + 1);
-        if (shown && this.playing) this.schedule();
-      }, this.example.duration * 1000 / (this.example.frameCount - 1));
+    updateButton() {
+      const ended = !this.playing && this.clock.currentTime >= this.duration - 0.05;
+      const label = this.playing ? 'Pause' : ended ? 'Replay' : 'Play';
+      this.button.querySelector('.toggle-text').textContent = label;
+      this.button.firstElementChild.textContent = this.playing ? 'Ⅱ' : '▶';
+      this.button.setAttribute('aria-label', `${label} ${this.example.title}`);
     }
   }
 
-  const players = examples.map((example) => new FramePlayer(example));
+  const players = examples.map((example) => new SyncedPlayer(example));
   if ('IntersectionObserver' in window) {
+    // Buffer an example's videos only once it is about to scroll into view.
     const preload = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          const player = players.find((item) => item.row === entry.target);
-          if (player.revision === 0) player.show(0);
-          preload.unobserve(entry.target);
-        }
+        if (!entry.isIntersecting) return;
+        players.find((item) => item.row === entry.target).load();
+        preload.unobserve(entry.target);
       });
     }, { rootMargin: '300px' });
     const visibility = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
-        if (!entry.isIntersecting) players.find((item) => item.row === entry.target).pause();
+        const player = players.find((item) => item.row === entry.target);
+        if (!entry.isIntersecting && player.playing) player.pause();
       });
     });
     players.forEach((player) => { preload.observe(player.row); visibility.observe(player.row); });
-  } else players.forEach((player) => player.show(0));
+  } else players.forEach((player) => player.load());
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden) players.forEach((player) => player.pause());
+    if (document.hidden) players.forEach((player) => { if (player.playing) player.pause(); });
   });
 })();

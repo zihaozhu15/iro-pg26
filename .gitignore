@@ -1,1 +1,4 @@
 tmp/
+imgs/
+# Original renders; the page uses the clips in videos/ instead.
+docs/assets/results/0*/*.mp4

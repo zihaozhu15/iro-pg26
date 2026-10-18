@@ -1,21 +1,41 @@
-# IRO-PG26
+# Inverse Rig Optimization from Line Drawings
 
-Research project website hosted with GitHub Pages.
+**Zihao Zhu, [Yuki Koyama](https://koyama.xyz/)** · The University of Tokyo
+Pacific Graphics 2026 (Conference Papers)
 
-## Publish
+[Project page](https://zihaozhu15.github.io/iro-pg26/) ·
+[Paper](https://doi.org/10.2312/pg.20261011) ·
+[arXiv](https://arxiv.org/abs/2609.00732)
 
-In the GitHub repository, open **Settings → Pages**, choose **Deploy from a
-branch**, then select the `main` branch and `/docs` folder.
+![Teaser](docs/assets/teaser-1280.webp)
 
-The site will be available at:
+This repository hosts the source of the project page only; it does not contain
+an implementation of the method.
 
-<https://zihaozhu15.github.io/iro-pg26/>
+## Citation
 
-## Edit
+```bibtex
+@inproceedings{10.2312:pg.20261011,
+booktitle = {Pacific Graphics 2026 - Conference Papers and Posters},
+editor = {He, Ying and Thuerey, Nils and Liu, Lingjie},
+title = {{Inverse Rig Optimization from Line Drawings}},
+author = {Zhu, Zihao and Koyama, Yuki},
+year = {2026},
+publisher = {The Eurographics Association},
+ISBN = {978-3-03868-327-8},
+DOI = {10.2312/pg.20261011}
+}
+```
 
-The website source is in `docs/`:
+## Repository layout
 
-- Edit `docs/index.html` for paper content.
-- Edit `docs/styles.css` for presentation.
-- Put figures and videos in `docs/assets/` and use relative paths such as
-  `assets/teaser.webp`.
+- `docs/`: the static project page served by GitHub Pages.
+- `videos/`: source videos for the interactive results.
+- `scripts/`: regenerate the web-sized figures and result videos
+  (`prepare-images.py`, `prepare-results.py`; see `scripts/RESULTS.md`).
+
+## Credits
+
+Character models © Blender Studio, miHoYo, and DillonGoo Studios. They are
+shown for research demonstration only and are not covered by any license of
+this repository.

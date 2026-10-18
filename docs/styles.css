@@ -84,7 +84,7 @@ a {
 
 .eyebrow {
   color: var(--pg-yellow);
-  font-size: 0.78rem;
+  font-size: 0.95rem;
   font-weight: 750;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -452,6 +452,11 @@ var {
   background: transparent;
 }
 
+.pipeline-figure a {
+  display: block;
+  cursor: zoom-in;
+}
+
 .paper-figure figcaption {
   max-width: 760px;
   margin-top: 12px;
@@ -571,18 +576,14 @@ var {
   gap: 22px;
 }
 
+/* Example 04: Start and the extra camera view on the first row, the paired views below. */
 .result-example--landscape .result-layout {
-  grid-template-columns: minmax(0, 1fr);
-  gap: 28px;
-}
-
-.result-example--landscape .result-start {
-  width: min(620px, 100%);
-  justify-self: center;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px 22px;
 }
 
 .result-example--landscape .result-playback {
-  grid-column: auto;
+  grid-column: 1 / -1;
 }
 
 .result-image-stack,
@@ -596,26 +597,13 @@ var {
 }
 
 .result-image-stack img,
-.result-frame img,
-.result-frame canvas {
+.result-frame video {
   position: absolute;
   inset: 0;
   display: block;
   width: 100%;
   height: 100%;
   object-fit: contain;
-}
-
-.result-frame canvas {
-  visibility: hidden;
-}
-
-.frames-ready .result-frame canvas {
-  visibility: visible;
-}
-
-.frames-ready .result-poster {
-  visibility: hidden;
 }
 
 .result-legend {
@@ -893,7 +881,8 @@ footer {
     justify-self: center;
   }
 
-  .result-playback {
+  .result-playback,
+  .result-example--landscape .result-playback {
     grid-column: auto;
   }
 
