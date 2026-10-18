@@ -1,6 +1,9 @@
 # Inverse Rig Optimization from Line Drawings
 
-**Zihao Zhu, [Yuki Koyama](https://koyama.xyz/)** · The University of Tokyo
+**Zihao Zhu, [Yuki Koyama](https://koyama.xyz/)**
+
+The University of Tokyo
+
 Pacific Graphics 2026 (Conference Papers)
 
 [Project page](https://zihaozhu15.github.io/iro-pg26/) ·
