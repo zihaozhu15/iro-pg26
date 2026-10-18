@@ -50,7 +50,7 @@
             <div class="result-image-stack">
               ${example.starts.map((url, index) => `<img src="${url}" loading="lazy" decoding="async" width="${example.width}" height="${example.height}" alt="${index === 0 ? `${example.title}: initial pose with contour strokes` : ''}" ${index > 0 ? 'aria-hidden="true"' : ''}>`).join('')}
             </div>
-            <p class="result-legend"><span class="legend-initial">Initial contour</span><span class="legend-target">Target strokes</span></p>
+            <p class="result-legend"><span class="legend-initial">Initial contour</span><span class="legend-target">Target stroke</span></p>
           </figure>
           ${extra.map((track) => view(example, track)).join('')}
           <div class="result-playback" role="group" aria-label="${example.title}: synchronized views">
