@@ -13,7 +13,8 @@
   --accent: #006b76;
   --accent-dark: #00515b;
   --card: #ffffff;
-  --max-width: 1120px;
+  /* Content spans this share of the viewport; the rest is split evenly as side whitespace. */
+  --content-width: 70%;
 }
 
 * {
@@ -43,7 +44,7 @@ a {
 }
 
 .shell {
-  width: min(var(--max-width), calc(100% - 40px));
+  width: var(--content-width);
   margin-inline: auto;
 }
 
@@ -106,7 +107,7 @@ h2 {
 
 h1 {
   width: 100%;
-  max-width: 900px;
+  max-width: 1100px;
   margin-bottom: 24px;
   font-size: clamp(2.8rem, 5.2vw, 5rem);
   line-height: 1.02;
@@ -120,8 +121,8 @@ h2 {
 }
 
 .dek {
+  /* Breaks after "from" into two centered lines. */
   width: 100%;
-  max-width: 710px;
   margin-bottom: 32px;
   color: rgba(255, 255, 255, 0.72);
   font-size: clamp(1.05rem, 2vw, 1.25rem);
@@ -196,7 +197,6 @@ h2 {
 }
 
 .visual {
-  width: min(1184px, calc(100% - 32px));
   margin-top: -48px;
   isolation: isolate;
 }
@@ -280,11 +280,13 @@ var {
 
 .prose p,
 .section-intro {
-  max-width: 920px;
+  /* A moderate measure (about 70 characters per line) keeps the justified serif text readable. */
+  max-width: 720px;
   margin-inline: auto;
   color: #304b5a;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(1.1rem, 2vw, 1.35rem);
+  font-size: clamp(1.05rem, 1.5vw, 1.25rem);
+  line-height: 1.7;
   hyphens: auto;
   text-align: justify;
   text-justify: inter-word;
@@ -489,14 +491,10 @@ var {
 .pipeline-figure {
   grid-column: 1 / -1;
   justify-self: center;
-  width: min(1480px, calc(100vw - 32px));
+  width: 100%;
   margin-top: 36px;
   margin-left: 0;
   transform: none;
-}
-
-#results {
-  width: min(1280px, calc(100% - 40px));
 }
 
 .results-hint {
@@ -774,6 +772,11 @@ footer {
 }
 
 @media (max-width: 720px) {
+  :root {
+    /* Phones keep 10% side whitespace; 15% would leave too little room. */
+    --content-width: 80%;
+  }
+
   .hero,
   .hero-content {
     min-height: 600px;
@@ -789,8 +792,14 @@ footer {
     font-size: clamp(2.25rem, 10.5vw, 3.1rem);
   }
 
+  /* Too narrow for the two-line split: let the subtitle wrap naturally. */
   .dek {
     max-width: 330px;
+  }
+
+  h1 br,
+  .dek br {
+    display: none;
   }
 
   .authors {
@@ -819,14 +828,12 @@ footer {
   }
 
   .visual {
-    width: calc(100% - 20px);
     margin-top: -22px;
     padding: 7px;
     border-radius: 9px;
   }
 
   .pipeline-figure {
-    width: calc(100vw - 20px);
     padding: 7px;
     border-radius: 9px;
   }
